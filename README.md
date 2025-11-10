@@ -42,8 +42,8 @@ A dropdown menu with knowledge management options:
 The extension intelligently manages different URL types to ensure optimal connectivity:
 
 #### Internal vs External URLs
-- **Internal URL (Green indicator ![Internal](icons/Internal_url.png))**: Your local or private Open WebUI instance (e.g., `http://localhost:3000`)
-- **External URL (Yellow indicator ![External](icons/External_url.png))**: Public or remote Open WebUI instance (e.g., `https://openwebui.example.com`)
+- **Internal URL Your local or private Open WebUI instance (e.g., `http://localhost:3000`)
+- **External URL  Public or remote Open WebUI instance (e.g., `https://openwebui.example.com`)
 
 The extension automatically:
 1. Checks if your internal URL is reachable
@@ -68,8 +68,8 @@ Without this approach, you might encounter:
 ### 🔍 Status Indicators
 
 The extension displays visual indicators to show the current connection status:
-- **Green icon** ![Internal](icons/Internal_url.png): Connected to internal/local Open WebUI instance
-- **Yellow icon** ![External](icons/External_url.png): Connected to external/remote Open WebUI instance
+- **Green I** ![Internal] Connected to internal/local Open WebUI instance
+- **Green O* ![External] Connected to external/remote Open WebUI instance
 - **Status messages**: Temporary notifications for successful operations or errors
 
 ## Installation Instructions

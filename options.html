@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tab Sidebar Options</title>
+    <style>
+        body {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header-row h1 {
+            margin: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="url"],
+        input[type="text"],
+        input[type="password"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        select {
+            height: 38px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: monospace;
+        }
+        input[type="checkbox"] {
+            margin-right: 8px;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        #customPromptGroup {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+        #customPromptGroup.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .section-divider {
+            border-top: 1px solid #ddd;
+            margin: 20px 0;
+            padding-top: 15px;
+        }
+        button {
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #006cbd;
+        }
+        #save {
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            height: fit-content;
+        }
+        #save:hover {
+            background-color: #006cbd;
+        }
+        #status {
+            margin-top: 10px;
+            padding: 10px;
+            display: none;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .api-settings {
+            transition: opacity 0.2s ease;
+        }
+        .api-settings input:disabled,
+        .api-settings select:disabled,
+        .api-settings textarea:disabled,
+        .api-settings button:disabled {
+            cursor: not-allowed;
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-row">
+            <h1>Tab Sidebar Settings</h1>
+            <button id="save">Save Settings</button>
+        </div>
+        
+        <div class="form-group">
+            <label for="sidebarUrl">Internal OWUI URL:</label>
+            <input type="url" id="sidebarUrl" placeholder="https://example.com" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="externalUrl">External URL Field:</label>
+            <input type="url" id="externalUrl" placeholder="https://external-api.com">
+        </div>
+        
+        <div class="form-group">
+            <div class="checkbox-group">
+                <input type="checkbox" id="enableApiAccess">
+                <label for="enableApiAccess" style="margin: 0;">Enable API access (for Knowledge functions)</label>
+            </div>
+        </div>
+        
+        <div class="form-group api-settings" style="opacity: 0.5;">
+            <label for="owuiApiKey">OWUI API Key or JWT Token</label>
+            <input type="password" id="owuiApiKey" placeholder="Enter your OWUI API key or JWT token" disabled>
+        </div>
+        
+        <div class="form-group api-settings" style="opacity: 0.5;">
+            <label for="knowledgeCollection">Default Knowledge Collection</label>
+            <select id="knowledgeCollection" disabled>
+                <option value="">Loading collections...</option>
+            </select>
+            <div id="collectionStatus" style="margin-top: 5px; font-size: 0.9em; color: #666;">
+                Please enter and validate OpenWebUI URL first
+            </div>
+        </div>
+        
+        <div class="form-group api-settings" style="opacity: 0.5;">
+            <label for="newKnowledgeName">Create New Knowledge Collection</label>
+            <input type="text" id="newKnowledgeName" placeholder="Enter collection name" disabled>
+            <textarea id="newKnowledgeDescription" placeholder="Enter collection description (optional)" rows="2" disabled style="margin-top: 10px;"></textarea>
+            <button id="createKnowledge" disabled style="margin-top: 10px; background-color: black; color: white;">Create Collection</button>
+            <div id="createStatus" style="margin-top: 5px; font-size: 0.9em; color: #666;"></div>
+        </div>
+        
+        <div class="form-group section-divider">
+            <label for="summaryLanguage">Language for Tab Summary:</label>
+            <select id="summaryLanguage">
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="it">Italian</option>
+                <option value="pt">Portuguese</option>
+                <option value="ru">Russian</option>
+                <option value="zh">Chinese (Simplified)</option>
+                <option value="ja">Japanese</option>
+                <option value="ar">Arabic</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <div class="checkbox-group">
+                <input type="checkbox" id="overridePrompt">
+                <label for="overridePrompt" style="margin: 0;">Override default Summary Prompt</label>
+            </div>
+            
+            <div id="customPromptGroup" class="disabled">
+                <label for="customPrompt">Custom Summary Prompt:</label>
+                <textarea id="customPrompt" placeholder="Enter your custom prompt for tab summarization..."></textarea>
+            </div>
+        </div>
+        
+        <div id="status"></div>
+    </div>
+    <script src="OWUI_Knowledge_tools.js"></script>
+    <script src="options.js"></script>
+</body>
+</html>

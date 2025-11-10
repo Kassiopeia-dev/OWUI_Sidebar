@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OWUI Sidebar</title>
+    <link rel="icon" type="image/png" href="icons/favicon-dark.png">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background-color: #000000;
+        }
+        #controls {
+            padding: 8px 5px 8px 8px;  /* Reduced right padding from 8px to 5px to allow icons to shift right */
+            background: #000000;
+            border-bottom: 1px solid #333;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            position: relative;
+            justify-content: flex-end;
+        }
+        #attachWebpageBtn, #summarizePageBtn, #ragButton {
+            padding: 5px 8px;
+            background: #000000;
+            color: white;
+            border: 1px solid #555555;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            min-width: 0;
+            overflow: visible;  /* Changed from hidden to visible to prevent text cutoff */
+            white-space: nowrap;  /* Keep text on single line */
+            /* Removed text-overflow: ellipsis to prevent "..." truncation */
+            line-height: 1.2;  /* Ensure proper line height for small fonts */
+        }
+        #attachWebpageBtn:hover, #summarizePageBtn:hover, #ragButton:hover {
+            background: #1a1a1a;
+            border-color: #777777;
+        }
+        #attachWebpageBtn:active, #summarizePageBtn:active, #ragButton:active {
+            background: #0d0d0d;
+            border-color: #444444;
+        }
+        #status {
+            font-size: 12px;
+            color: #cccccc;
+            margin-left: 8px;
+        }
+        iframe {
+            width: 100%;
+            flex: 1;
+            border: none;
+        }
+        .rag-button-container {
+            position: relative;
+            display: none; /* Hidden by default, shown only when API key is configured */
+        }
+        .rag-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 4px;
+            background: #000000;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            min-width: 200px;
+            z-index: 1000;
+            padding: 6px 0;
+            border: 1px solid #333333;
+        }
+        .rag-dropdown.show {
+            display: block;
+        }
+        .rag-dropdown-item {
+            padding: 8px 16px;
+            color: #ffffff;
+            text-decoration: none;
+            display: block;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        .rag-dropdown-item:hover {
+            background-color: #1a1a1a;
+        }
+        .rag-dropdown-separator {
+            height: 1px;
+            background: #333333;
+            margin: 4px 0;
+        }
+        .status-icon {
+            width: 13px;
+            height: 13px;
+            display: none;
+            margin-left: 8px;
+        }
+        .status-icon.active {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Modal for Upload to Collection -->
+    <div id="uploadModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 8px; padding: 20px; min-width: 300px; max-width: 400px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+            <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #333;">Upload to Knowledge Collection</h3>
+            
+            <div style="margin-bottom: 15px;">
+                <label for="collectionSelect" style="display: block; margin-bottom: 5px; font-size: 13px; color: #666;">Select Collection:</label>
+                <select id="collectionSelect" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                    <option value="">Loading collections...</option>
+                </select>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: flex; align-items: center; cursor: pointer; font-size: 13px; color: #333;">
+                    <input type="checkbox" id="uploadPageCheckbox" style="margin-right: 8px;">
+                    <span>Upload Current Tab</span>
+                </label>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label for="fileInput" style="display: block; margin-bottom: 5px; font-size: 13px; color: #666;">Select File:</label>
+                <input type="file" id="fileInput" style="width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                <div id="selectedFileName" style="margin-top: 5px; font-size: 12px; color: #666;"></div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button id="cancelUpload" style="padding: 8px 16px; background: #f5f5f5; color: #333; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 14px;">Cancel</button>
+                <button id="confirmUpload" style="padding: 8px 16px; background: #000; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;" disabled>Upload</button>
+            </div>
+            
+            <div id="modalStatus" style="margin-top: 10px; padding: 8px; border-radius: 4px; font-size: 12px; display: none;"></div>
+        </div>
+    </div>
+    <div id="controls">
+        <div class="rag-button-container">
+            <button id="ragButton">Knowledge</button>
+            <div class="rag-dropdown" id="ragDropdown">
+                <a class="rag-dropdown-item" id="uploadPageDefault" title="Extract current tab content and upload to default knowledge collection">Upload Tab to Default</a>
+                <a class="rag-dropdown-item" id="uploadDefault" title="Upload text documents (PDF, DOC, TXT, etc.) to default knowledge collection">Upload File to Default</a>
+                <a class="rag-dropdown-item" id="uploadTo" title="Upload tab/document to a specific knowledge collection">Upload to...</a>
+                <div class="rag-dropdown-separator"></div>
+                <a class="rag-dropdown-item" id="manageKnowledge" title="Open settings and/or manage knowledge collections">Settings/Manage Knowledge</a>
+            </div>
+        </div>
+        <button id="attachWebpageBtn" title="Send active tab content to chat">
+            Chat with Tab
+        </button>
+        <button id="summarizePageBtn" title="Send active tab content to chat, and request summary">
+            Summarize
+        </button>
+        <img src="icons/Internal_url.png" class="status-icon" id="internalIcon" alt="Internal" title="Using Internal OWUI URL">
+        <img src="icons/External_url.png" class="status-icon" id="externalIcon" alt="External" title="Using External OWUI URL">
+        <span id="status"></span>
+    </div>
+    <div id="errorMessage" style="display: none; padding: 20px; color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; margin: 10px; border-radius: 4px; text-align: center; position: relative;">
+        <span class="message-text"></span>
+        <button class="dismiss-button" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); padding: 5px 10px; border-radius: 4px; border: 1px solid #721c24; background: transparent; color: #721c24; cursor: pointer;">✕</button>
+    </div>
+    <iframe id="sidebarFrame"></iframe>
+    <script src="OWUI_Knowledge_tools.js"></script>
+    <script src="sidepanel.js"></script>
+</body>
+</html>

@@ -238,10 +238,6 @@ This extension is provided as open source software for the Open WebUI community.
 - Incorporate components into other projects
 - Distribute modified versions
 
-When distributing modified versions, please:
-- Add your preferred open source license (MIT, Apache 2.0, GPL, etc.)
-- Consider contributing improvements back to the community
-- Maintain attribution where appropriate
 
 The extension is provided "as-is" without warranty of any kind, express or implied.
 

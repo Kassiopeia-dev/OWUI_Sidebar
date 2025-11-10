@@ -377,8 +377,12 @@ async function handleYouTubeVideo(activeTab, iframe, statusEl, shouldSummarize =
         // Build the new URL with the load-url parameter
         let newIframeUrl = `${baseUrl}?load-url=${encodedYouTubeUrl}`;
         
-        // If summarize is requested, we might need to handle the prompt differently
-        // For now, we'll just load the URL and note that summarization was requested
+        // Load the YouTube URL into the iframe using the ?load-url parameter
+        iframe.src = newIframeUrl;
+        
+        console.log(`✅ SUCCESS: URL Parameter method - YouTube URL loaded via ?load-url=${encodedYouTubeUrl}`);
+        
+        // If summarize is requested, send the prompt after the URL loads
         if (shouldSummarize) {
             // Get settings from storage for summary prompt
             const summarySettings = await chrome.storage.sync.get({
@@ -411,33 +415,42 @@ async function handleYouTubeVideo(activeTab, iframe, statusEl, shouldSummarize =
                     'pl': 'Polish'
                 };
                 const language = languageNames[summarySettings.summaryLanguage] || 'English';
-                promptText = `Summarize this in ${language}`;
+                promptText = `Summarize this page in ${language}`;
             }
             console.log(`📝 Prepared summarize prompt: ${promptText}`);
             
-            // Note: OWUI may support additional parameters for prompts
-            // If OWUI supports a prompt parameter, you could add it like:
-            // newIframeUrl += `&prompt=${encodeURIComponent(promptText)}`;
+            // Wait for the iframe to load the YouTube URL, then send the summarize prompt
+            // We need to give it time to process the URL parameter and load the content
+            setTimeout(() => {
+                console.log('Sending summarize prompt via postMessage...');
+                try {
+                    // Send the prompt to the iframe to be submitted
+                    iframe.contentWindow.postMessage({
+                        action: 'submitPrompt',
+                        promptText: promptText
+                    }, '*');
+                    console.log('✅ Sent summarize prompt to iframe');
+                } catch (e) {
+                    console.error('Error sending summarize prompt:', e);
+                }
+            }, 5000); // Wait 5 seconds for YouTube content to load
         }
-        
-        // Load the YouTube URL into the iframe using the ?load-url parameter
-        iframe.src = newIframeUrl;
-        
-        console.log(`✅ SUCCESS: URL Parameter method - YouTube URL loaded via ?load-url=${encodedYouTubeUrl}`);
         
         // Update status message
         const statusMessage = shouldSummarize ?
-            'Loading YouTube content with summarize prompt...' :
+            'Loading YouTube content for summarization...' :
             'Loading YouTube content...';
         showStatusMessage(statusMessage);
         
         // Clear status after a delay
         setTimeout(() => {
             const messageDiv = document.getElementById('errorMessage');
-            if (messageDiv.style.display === 'block' && messageDiv.querySelector('.message-text').textContent === statusMessage) {
-                showStatusMessage('YouTube content loaded');
+            if (messageDiv.style.display === 'block' &&
+                (messageDiv.querySelector('.message-text').textContent === statusMessage ||
+                 messageDiv.querySelector('.message-text').textContent === 'Loading YouTube content for summarization...')) {
+                showStatusMessage(shouldSummarize ? 'YouTube content loaded, summarizing...' : 'YouTube content loaded');
             }
-        }, 3000);
+        }, shouldSummarize ? 6000 : 3000); // Longer delay if summarizing
         
     } catch (error) {
         console.error('Error handling YouTube video:', error);

@@ -1,3 +1,5 @@
+10-11-2025 Fixed youtube url summary function
+
 # OWUI Sidebar Extension
 
 A Chrome/Edge(tested)/Brave extension that integrates Open WebUI (OWUI) directly into your browser's sidebar, providing seamless access to AI chat capabilities while preserving your browsing context and authentication.

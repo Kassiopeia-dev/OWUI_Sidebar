@@ -1,3 +1,4 @@
+09-06-2026 Fixed knowledge handling errors which resulted from owui changes
 10-11-2025 Fixed youtube url summary function
 
 # OWUI Sidebar Extension

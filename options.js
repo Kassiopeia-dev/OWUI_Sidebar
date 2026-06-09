@@ -66,7 +66,19 @@ async function validateUrlAndLoadCollections() {
             throw new Error('Invalid response format. Expected JSON.');
         }
         
-        const collections = await response.json();
+        const responseData = await response.json();
+        
+        // Handle both old format (direct array) and new format (wrapped in object)
+        let collectionsArray;
+        if (Array.isArray(responseData)) {
+            // Old format: direct array
+            collectionsArray = responseData;
+        } else if (responseData && typeof responseData === 'object') {
+            // New format: try common property names
+            collectionsArray = responseData.data || responseData.collections || responseData.items || [];
+        } else {
+            collectionsArray = [];
+        }
         
         // Store current selection
         const currentValue = knowledgeCollection.value;
@@ -81,7 +93,7 @@ async function validateUrlAndLoadCollections() {
         knowledgeCollection.appendChild(defaultOption);
         
         // Add collections to dropdown
-        collections.forEach(collection => {
+        collectionsArray.forEach(collection => {
             const option = document.createElement('option');
             option.value = collection.id;
             option.textContent = collection.name;
@@ -93,7 +105,7 @@ async function validateUrlAndLoadCollections() {
             knowledgeCollection.value = currentValue;
         }
         
-        collectionStatus.textContent = `${collections.length} collections loaded`;
+        collectionStatus.textContent = `${collectionsArray.length} collections loaded`;
     } catch (error) {
         console.error('Error loading collections:', error);
         if (error.message.includes('Invalid response format')) {

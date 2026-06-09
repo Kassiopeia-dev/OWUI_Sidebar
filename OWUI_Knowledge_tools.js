@@ -42,8 +42,21 @@ async function getListKnowledge(OPEN_WEBUI_API_URL, OPEN_WEBUI_API_KEY) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const data = await response.json();
-        return data.map(knowledge => ({
+        const responseData = await response.json();
+        
+        // Handle both old format (direct array) and new format (wrapped in object)
+        let knowledgeArray;
+        if (Array.isArray(responseData)) {
+            // Old format: direct array
+            knowledgeArray = responseData;
+        } else if (responseData && typeof responseData === 'object') {
+            // New format: try common property names
+            knowledgeArray = responseData.data || responseData.collections || responseData.items || [];
+        } else {
+            knowledgeArray = [];
+        }
+        
+        return knowledgeArray.map(knowledge => ({
             id: knowledge.id,
             name: knowledge.name,
             description: knowledge.description
